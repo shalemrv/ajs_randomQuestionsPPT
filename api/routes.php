@@ -1,5 +1,12 @@
 <?php
-	require("jsonHeaders.php");
+
+	header("Access-Control-Allow-Origin: *");
+	header("Content-Type: application/json; charset=UTF-8");
+	header("Access-Control-Allow-Methods: POST");
+	header("Access-Control-Max-Age: 3600");
+	header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
+
+	error_reporting(-1);
 
 	$finalResponse = array(
 		"complete"  => false,
@@ -47,7 +54,7 @@
 		);
 
 		if(!in_array($fileType, $csvMimetypes)) {
-		    $finalResponse["message"] = "File type must be csv format. Uploaded file type => $fileType";
+			$finalResponse["message"] = "File type must be csv format. Uploaded file type => $fileType";
 			return $finalResponse;
 		}
 
@@ -77,7 +84,7 @@
 
 		$finalResponse = array(
 			"complete"  => true,
-			"message"   => "✔ File successfully parsed.".sizeof($students)." students found." ,
+			"message"   => "File successfully parsed. ".sizeof($students)." students found." ,
 			"result"	=> $students
 		);
 
@@ -87,7 +94,8 @@
 	function processQuestions(){
 		$finalResponse = array(
 			"complete"  => false,
-			"message"   => "No File Received."
+			"message"   => "No File Received.",
+			"files"		=> $_FILES
 		);
 
 		if(empty($_FILES)){
@@ -111,7 +119,7 @@
 		);
 
 		if(!in_array($fileType, $csvMimetypes)) {
-		    $finalResponse["message"] = "File type must be csv format. Uploaded file type => $fileType";
+			$finalResponse["message"] = "File type must be csv format. Uploaded file type => $fileType";
 			return $finalResponse;
 		}
 
@@ -152,7 +160,7 @@
 
 		$finalResponse = array(
 			"complete"  => true,
-			"message"   => "✔ File successfully parsed. ".sizeof($questions)." categories & $finalCount questions parsed." ,
+			"message"   => "File successfully parsed. ".sizeof($questions)." categories & $finalCount questions parsed." ,
 			"result"	=> $questions
 		);
 

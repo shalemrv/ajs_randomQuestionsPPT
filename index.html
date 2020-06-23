@@ -13,7 +13,7 @@
 				grid-template-columns: 1fr auto 1fr;
 				padding: 10px 30px;
 			}
-			#mainForm{
+			#uploadStudentsForm, #uploadQuestionsForm{
 				border: 2px solid black;
 				border-radius: 5px;
 				padding: 10px;
@@ -24,7 +24,7 @@
 				border-radius: 500px;
 			}
 			.card{
-				border-radius: 3px;
+				border-radius: 5px;
 			}
 			.card-header{
 				padding: 0.5rem 1rem;
@@ -41,6 +41,15 @@
 				margin: 0 5px 10px 5px;
 				cursor: default;
 			}
+			.questionCard{
+				display: inline-block;
+				width: auto;
+				max-width: 400px;
+				margin: 20px; 
+			}
+			td{
+				font-size: 0.8rem;
+			}
 		</style>
 		<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
 		<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
@@ -49,6 +58,7 @@
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js"></script>
 		<script src="src/angularjs/angular.min.js"></script>
 		<script src="app/app.js"></script>
+		<script src="src/pptxgen/pptxgen.bundle.js"></script>
 
 	</head>
 	<body ng-app="myApp" ng-controller="appCtrl">
@@ -61,24 +71,25 @@
 		</nav>
 
 		<section class="pt-3">
-			<!-- First Row -->
-			<div class="grid-h-center">
+			<!-- First Row -->		
+
+			<div class="grid-h-center" ng-hide="studentsList.length">
 				<div></div>
-				<form id="mainForm" name="uploadStudentsForm">
+				<form id="uploadStudentsForm" name="uploadStudentsForm">
 					<fieldset>
 						<div class="row">
 							<div class="col-md-8 col-sm-8 col-xs-8">
 								<div class="form-group">
-									<label for="exampleInputFile" class="font-weight-bold">Upload Students List File (CSV)</label>
+									<label for="studentsCSV" class="font-weight-bold">Upload Students List File (CSV)</label>
 									<input
 										type="file"
 										class="form-control-file"
-										id="studentsListFile"
-										aria-describedby="fileHelp"
-										file-input="files"
+										id="studentsCSV"
+										aria-describedby="fileHelpStudents"
+										file-input="studentsCSV"
 										required
 									/>
-									<small id="fileHelp" class="form-text text-muted">
+									<small id="fileHelpStudents" class="form-text text-muted">
 										The second column of the file has to contain the names of students.
 									</small>
 								</div>
@@ -101,21 +112,12 @@
 									Upload
 								</button>
 							</div>
-							<!-- <button
-								ng-click="uploadStudentsCSV()"
-								ng-disabled="uploadStudentsForm.$invalid"
-								class="btn btn-primary"
-								style="margin-top: 5px;"
-							>
-								Upload
-							</button> -->
 						</div>
 					</fieldset>
 				</form>
 				<div></div>
 			</div>
 
-			<!-- Second Row -->
 			<div class="grid-h-center mt-3">
 				<div></div>
 				<div>
@@ -131,12 +133,144 @@
 									ng-bind="student"
 								></span>
 							</div>
+							<div class="text-center">
+								<button
+									type="button"
+									class="btn btn-danger"
+									ng-click="resetPage()"
+								>Reset</button>
+							</div>
 						</div>
 					</div>
 				</div>
 				<div></div>
 			</div>
 
+			<!-- Second Row -->
+			<div class="grid-h-center" ng-if="studentsList.length" ng-hide="questionsList.length">
+				<div></div>
+				<form id="uploadQuestionsForm" name="uploadQuestionsForm">
+					<fieldset>
+						<div class="row">
+							<div class="col-md-8 col-sm-8 col-xs-8">
+								<div class="form-group">
+									<label for="questionsCSV" class="font-weight-bold">Upload Questions List File (CSV)</label>
+									<input
+										type="file"
+										class="form-control-file"
+										id="questionsCSV"
+										aria-describedby="fileHelpQuestions"
+										file-input="questionsCSV"
+										required
+									/>
+									<small id="fileHelpQuestions" class="form-text text-muted">
+										The first column needs to be the group number and second column has to contain the question.
+									</small>
+								</div>
+							</div>					
+							<div class="col-md-4 col-sm-4 col-xs-4 text-center">
+								<a
+									class="nav-link font-weight-bold text-muted"
+									href="uploads/questions.csv"
+									style="display: inline-block;"
+									download
+								>
+									Download Sample CSV
+								</a>
+								<button
+									ng-click="uploadQuestionsCSV()"
+									ng-disabled="uploadQuestionsForm.$invalid"
+									class="btn btn-success"
+									style="margin-top: 5px;"
+								>
+									Upload
+								</button>
+							</div>
+						</div>
+					</fieldset>
+				</form>
+				<div></div>
+			</div>
+
+			<div class="grid-h-center mt-3" ng-if="questionsList.length">
+				<div></div>
+				<div>
+					<div class="card text-white bg-dark mb-3">
+						<div class="card-header">
+							<h4 class="text-center">All Questions ({{questionsList.length}} categories)</h4>
+						</div>
+						<div class="card-body text-center">
+							<div class="questionCard card text-white bg-primary" ng-repeat="category in questionsList track by $index">
+								<div class="card-header">
+									<h4 class="text-center">Questions Group {{$index + 1}}:</h4>
+								</div>
+								<div class="card-body">
+									<div class="card-text text-left">
+										<table class="table table-hover">
+											<tr ng-repeat="question in category track by $index">
+												<td 
+													ng-class="{
+														'table-primary' 	: ($index % 5==0),
+														'table-secondary' 	: ($index % 5==1),
+														'table-success' 	: ($index % 5==2),
+														'table-danger' 		: ($index % 5==3),
+														'table-info' 		: ($index % 5==4)
+													}"
+													ng-bind="question"
+												></td>
+											</tr>
+										</table>
+									</div>
+								</div>
+							</div>							
+							<div class="text-center">
+								<button type="button" class="btn btn-info" ng-click="assignQuestions();">Assign Questions</button>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div></div>
+			</div>
+
+			<div class="grid-h-center mt-3" ng-if="pptList.length">
+				<div></div>
+				<div>
+					<div class="card text-white bg-dark mb-3">
+						<div class="card-header">
+							<h4 class="text-center">Questions Assigned ({{pptList.length}} PPTs)</h4>
+						</div>
+						<div class="card-body text-center">
+							<div class="questionCard card text-white bg-primary" ng-repeat="student in pptList track by $index">
+								<div class="card-header">
+									<h4 class="text-center" ng-bind="student.name"></h4>
+								</div>
+								<div class="card-body">
+									<div class="card-text text-left">
+										<table class="table table-hover">
+											<tr ng-repeat="question in student.questions track by $index">
+												<td 
+													ng-class="{
+														'table-primary' 	: ($index % 5==0),
+														'table-secondary' 	: ($index % 5==1),
+														'table-success' 	: ($index % 5==2),
+														'table-danger' 		: ($index % 5==3),
+														'table-info' 		: ($index % 5==4)
+													}"
+													ng-bind="question"
+												></td>
+											</tr>
+										</table>
+									</div>
+								</div>
+							</div>
+							<div class="text-center">
+								<button type="button" class="btn btn-info" ng-click="createDownloadPPTs();">Create PPT and Download</button>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div></div>
+			</div>
 		</section>
 
 	</body>
