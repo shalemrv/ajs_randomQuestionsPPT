@@ -8,6 +8,27 @@
 			header{
 				padding: 15px 25px;
 			}
+			#watermark{
+				position: fixed;
+				bottom: 10px;
+				right: 0;
+				border-radius: 500px 0 0 500px;
+				background-color: black;
+				padding: 3px 15px 3px 3px;
+				font-size: 12px;
+				box-shadow: 0 0 10px #3e00a0;
+				color: white;
+				z-index: 10000;
+			}
+			#watermark img{
+				width: 30px;
+				height: 30px;
+				object-fit: cover;
+				border-radius: 50%;
+			}
+			#watermark span{
+				padding-left: 5px;
+			}
 			.grid-h-center{
 				display: grid;
 				grid-template-columns: 1fr auto 1fr;
@@ -68,6 +89,12 @@
 					Assign Questions To students and create PPTs				
 				</h3>
 			</a>
+			<div id="watermark">
+				<img src="src/author.jpg" alt="">
+				<span>
+					Developed by <strong>Shalem Raj V</strong>
+				</span>
+			</div>
 		</nav>
 
 		<section class="pt-3">
