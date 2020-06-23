@@ -127,6 +127,11 @@ const _appCtrl = function($scope, $http, $timeout, $filter){
 
 	$scope.createDownloadPPTs = function(){
 
+		$("#downloadModal").modal({
+			backdrop: 'static',
+			keyboard: false
+		});
+
 		$scope.dateTimeNow = $filter("date")(new Date(), 'yyyyMMdd_HHmmss');
 
 		swal("", "If your broswer prompts to grant permission to download multiple files. Please click on ALLOW.", "info");
@@ -136,7 +141,7 @@ const _appCtrl = function($scope, $http, $timeout, $filter){
 		$scope.downloadCount = 0;
 		$scope.totalDownloads = $scope.studentsList.length * $scope.questionsList.length;
 
-		$("#downloadModal").modal("show");
+		// $("#downloadModal").modal("show");
 		
 		var seconds = 1;
 		$scope.pptList.forEach(function(ppt){
@@ -148,6 +153,7 @@ const _appCtrl = function($scope, $http, $timeout, $filter){
 	};
 
 	$scope.createPPT = function(ppt){
+
 		$scope.downloadingStudent = ppt.name;
 		ppt.questions.forEach(function(question, index){
 			let pptx = new PptxGenJS();
@@ -177,11 +183,6 @@ const _appCtrl = function($scope, $http, $timeout, $filter){
 			swal("", `Downloaded ${$scope.downloadCount} PPTs. Check your Downloads Folder`);
 		}
 	}
-
-	$("#downloadModal").modal({
-		backdrop: 'static',
-		keyboard: false
-	});
 };
 
 app.controller(
