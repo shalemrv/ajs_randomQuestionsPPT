@@ -7,7 +7,11 @@ const _appCtrl = function($scope, $http, $timeout, $filter){
 	$scope.questionsList	= [];
 	$scope.pptList 			= [];
 
-	$scope.dateTimeNow = $filter("date")(new Date(), 'yyyy-MM-dd HH_mm_ss');
+	$scope.downloading		= false;
+	$scope.downloadProgress	= 0;
+	$scope.downloadingStudent = "";
+
+	$scope.dateTimeNow = "";
 
 	$scope.studentsListFiles	= [];
 	$scope.questionsListFiles	= [];
@@ -16,8 +20,9 @@ const _appCtrl = function($scope, $http, $timeout, $filter){
 		$scope.studentsList		= [];
 		$scope.questionsList	= [];
 		$scope.pptList 			= [];
-
-		$scope.dateTimeNow = $filter("date")(new Date(), 'yyyy-MM-dd HH_mm_ss');
+		$scope.downloading 		= false;
+		$scope.downloadProgress	= 0;
+		$scope.downloadingStudent = "";
 
 		$scope.studentsListFiles	= [];
 		$scope.questionsListFiles	= [];
@@ -121,21 +126,31 @@ const _appCtrl = function($scope, $http, $timeout, $filter){
 	};
 
 	$scope.createDownloadPPTs = function(){
+
+		$scope.dateTimeNow = $filter("date")(new Date(), 'yyyyMMdd_HHmmss');
+
+		swal("", "If your broswer prompts to grant permission to download multiple files. Please click on ALLOW.", "info");
+
+		$scope.downloading = true;
+		$scope.downloadProgress = 0;
 		$scope.downloadCount = 0;
+		$scope.totalDownloads = $scope.studentsList.length * $scope.questionsList.length;
+
+		$("#downloadModal").modal("show");
+		
 		var seconds = 1;
 		$scope.pptList.forEach(function(ppt){
 			$timeout(function(){
 				$scope.createPPT(ppt);	
 			}, seconds*1000)
-			seconds += 3;
+			seconds += 6;
 		});
-	}
+	};
 
 	$scope.createPPT = function(ppt){
-
-		const pptx = new PptxGenJS();
-
-		ppt.questions.forEach(function(question){
+		$scope.downloadingStudent = ppt.name;
+		ppt.questions.forEach(function(question, index){
+			let pptx = new PptxGenJS();
 			let opts = {
 				x: 0.0,
 				y: 0.25,
@@ -150,16 +165,23 @@ const _appCtrl = function($scope, $http, $timeout, $filter){
 				question,
 				opts
 			);
-		});
 
-		pptx.writeFile(`${$scope.dateTimeNow} ${ppt.name}`);
+			pptx.writeFile(`${$scope.dateTimeNow} ${ppt.name} Q${index + 1}`);
+			$scope.downloadCount++;
 
-		$scope.downloadCount++;
+			$scope.downloadProgress = $scope.downloadCount * 100 / $scope.totalDownloads;
+		});		
 
-		if($scope.downloadCount==$scope.pptList.length){
+		if($scope.downloadCount==($scope.pptList.length*$scope.questionsList.length)){
+			$("#downloadModal").modal("hide");
 			swal("", `Downloaded ${$scope.downloadCount} PPTs. Check your Downloads Folder`);
 		}
 	}
+
+	$("#downloadModal").modal({
+		backdrop: 'static',
+		keyboard: false
+	});
 };
 
 app.controller(

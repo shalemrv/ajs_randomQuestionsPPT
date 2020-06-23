@@ -89,12 +89,33 @@
 				Developed by <strong>Shalem Raj V</strong>
 			</span>
 		</div>
+
 		<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
 			<a class="navbar-brand">
 				<h3 class="text-center ml-2">
 					Assign Questions to Students & Create PPTs				
 				</h3>
-			</a>			
+			</a>
+			<button
+				ng-if="studentsList.length"
+				type="button"
+				class="navbar-toggler btn btn-danger my-2 my-sm-0 px-3"
+				ng-click="resetPage()"
+				aria-label="Reset Form"
+			>Reset</button>
+			<div class="collapse navbar-collapse" id="navbarColor01">
+				<ul class="navbar-nav mr-auto">
+				</ul>
+				<form class="form-inline my-2 my-lg-0">
+					<button
+						ng-if="studentsList.length"
+						type="button"
+						class="btn btn-danger my-2 my-sm-0 px-3"
+						ng-click="resetPage()"
+						aria-label="Reset Form"
+					>Reset</button>
+				</form>
+			</div>
 		</nav>
 
 		<section class="pt-3">
@@ -160,13 +181,6 @@
 									ng-bind="student"
 								></span>
 							</div>
-							<div class="text-center">
-								<button
-									type="button"
-									class="btn btn-danger"
-									ng-click="resetPage()"
-								>Reset</button>
-							</div>
 						</div>
 					</div>
 				</div>
@@ -224,7 +238,7 @@
 				<div>
 					<div class="card text-white bg-dark mb-3">
 						<div class="card-header">
-							<h4 class="text-center">All Questions ({{questionsList.length}} categories)</h4>
+							<h4 class="text-center">All Questions ({{questionsList.length}} groups)</h4>
 						</div>
 						<div class="card-body text-center">
 							<div class="questionCard card text-white bg-primary" ng-repeat="category in questionsList track by $index">
@@ -291,7 +305,7 @@
 								</div>
 							</div>
 							<div class="text-center">
-								<button type="button" class="btn btn-info" ng-click="createDownloadPPTs();">Create PPT and Download</button>
+								<button type="button" class="btn btn-info" ng-click="createDownloadPPTs();">Create ({{pptList.length * questionsList.length}}) PPT and Download</button>
 							</div>
 						</div>
 					</div>
@@ -299,6 +313,31 @@
 				<div></div>
 			</div>
 		</section>
+
+		<div class="modal fade" id="downloadModal">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h4 class="modal-title">Downloading {{downloadingStudent}}'s PPT(s)</h4>
+					</div>
+					<div class="modal-body">
+						<div class="progress">
+							<div
+								class="progress-bar progress-bar-striped progress-bar-animated"
+								role="progressbar"
+								aria-valuenow="{{downloadProgress}}"
+								aria-valuemin="0"
+								aria-valuemax="100"
+								ng-style="{width: downloadProgress+'%'}"
+							></div>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<h6>{{downloadCount}} / {{totalDownloads}}</h6>
+					</div>
+				</div>
+			</div>
+		</div>		
 
 	</body>
 </html>
