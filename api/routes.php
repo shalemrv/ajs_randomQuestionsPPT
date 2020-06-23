@@ -85,7 +85,7 @@
 		$finalResponse = array(
 			"complete"  => true,
 			"message"   => "File successfully parsed. ".sizeof($students)." students found." ,
-			"result"	=> $students
+			"result"	=> array_unique($students)
 		);
 
 		return $finalResponse;
