@@ -176,7 +176,7 @@
 				<div>
 					<div class="card text-white bg-primary" ng-if="studentsList.length">
 						<div class="card-header">
-							<h4 class="text-center">List of Students (studentsList.length)</h4>
+							<h4 class="text-center">List of Students ({{studentsList.length}})</h4>
 						</div>
 						<div class="card-body">
 							<div class="card-text text-center">
@@ -324,9 +324,6 @@
 				<div class="modal-content">
 					<div class="modal-header">
 						<h4 class="modal-title">Downloading {{downloadingStudent}}'s PPT(s)</h4>
-						<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-							<span aria-hidden="true">&times;</span>
-						</button>
 					</div>
 					<div class="modal-body">
 						<div class="progress">

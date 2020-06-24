@@ -172,7 +172,7 @@ const _appCtrl = function($scope, $http, $timeout, $filter){
 				opts
 			);
 
-			pptx.writeFile(`${$scope.dateTimeNow} ${ppt.name} Q${index + 1}`);
+			pptx.writeFile(`${ppt.name} Q${index + 1} ${$scope.dateTimeNow}`);
 			$scope.downloadCount++;
 
 			$scope.downloadProgress = $scope.downloadCount * 100 / $scope.totalDownloads;

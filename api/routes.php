@@ -74,7 +74,14 @@
 			if($rowCount==0){
 				continue;
 			}
-			array_push($students, $rowArray[1]);
+
+			$sName = explode(" ", $rowArray[1]);
+
+			$sName = array_splice($sName, 0, 2);
+
+			$sName = implode(" ", $sName);			
+
+			array_push($students, $sName);
 		}
 
 		if($rowCount<=0){
