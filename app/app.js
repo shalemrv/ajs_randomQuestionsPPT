@@ -2,10 +2,18 @@ const app = angular.module("myApp", []);
 
 
 const _appCtrl = function($scope, $http, $timeout, $filter){
-
+	
+	$scope.imagesList		= [];
 	$scope.studentsList		= [];
 	$scope.questionsList	= [];
+
 	$scope.pptList 			= [];
+
+	$scope.qGroup	= -1;
+	$scope.qIndex	= -1;
+	$scope.qTitle	= "";
+	$scope.qPath 	= "";
+
 
 	$scope.downloading		= false;
 	$scope.downloadProgress	= 0;
@@ -16,9 +24,13 @@ const _appCtrl = function($scope, $http, $timeout, $filter){
 	$scope.studentsListFiles	= [];
 	$scope.questionsListFiles	= [];
 
+	// $scope.studentsList		= ["Jean King","Peter Ferguson","Janine Labrune","Jonas Bergulfsen","Susan Nelson","Zbyszek Piestrzeniewicz","Roland Keitel","Julie Murphy","Kwai Lee","Diego Freyre","Christina Berglund","Jytte Petersen","Mary Saveley","Eric Natividad","Jeff Young","Kelvin Leong","Juri Hashimoto","Wendy Victorino","Veysel Oeztan","Keith Franco","Isabel de","Martine Rance","Marie Bertrand","Jerry Tseng"];
+	// $scope.imagesList		= ["uploads/test/20200712085444_0.jpg","uploads/test/20200712085444_1.gif","uploads/test/20200712085444_2.jpg","uploads/test/20200712085444_3.jpg","uploads/test/20200712085444_4.jpg","uploads/test/20200712085444_5.jpg"];
+
 	$scope.resetPage = function(){
 		$scope.studentsList		= [];
 		$scope.questionsList	= [];
+		$scope.imagesList		= [];
 		$scope.pptList 			= [];
 		$scope.downloading 		= false;
 		$scope.downloadProgress	= 0;
@@ -26,16 +38,40 @@ const _appCtrl = function($scope, $http, $timeout, $filter){
 
 		$scope.studentsListFiles	= [];
 		$scope.questionsListFiles	= [];
+
+		$scope.resetImageAssign();
 	};
 
-	$scope.uploadStudentsCSV = function (){
+	$scope.resetImageAssign = function (){
+		$scope.qGroup	= -1;
+		$scope.qIndex	= -1;
+		$scope.qTitle	= "";
+		$scope.qPath 	= "";
+	};
+
+	$scope.clearJunk =  function(){
+		$http.get("api/routes.php?action=clear").then(
+			function(apiResponse){
+				console.log("Old filed cleared");
+			}
+		);
+	};
+
+	$scope.clearJunk();
+
+	$scope.uploadImage = function (){
+		if(!qImageFiles){
+			return;
+		}
 
 		var form_data = new FormData();
-		angular.forEach(studentsCSVFiles, function (file) {
+
+		angular.forEach(qImageFiles, function (file, ind) {
 		    form_data.append('fileToUpload', file);
 		});
+
 		$http.post(
-			'api/routes.php?action=students',
+			"api/routes.php?action=image",
 			form_data,
 			{
 			    transformRequest: angular.identity,
@@ -45,7 +81,123 @@ const _appCtrl = function($scope, $http, $timeout, $filter){
 			    }
 			}
 		).then(
+			function(httpResponse){
+				var apiResponse = httpResponse.data;
+				if(!apiResponse.complete){
+					$scope.studentsList = [];
+					swal({
+						icon : "error",
+						title: "Failed!",
+						text: apiResponse.message,
+						timer: 1500,
+						showConfirmButton: false
+					});
+					return;
+				}
+
+				qImageFiles= [];
+
+				$scope.imagesList.push(apiResponse.result);
+
+				swal({
+					icon : "success",
+					title: "Success",
+					text: apiResponse.message,
+					timer: 1000,
+					showConfirmButton: false
+				});
+			},
 			function (httpResponse) {
+				$scope.studentsList = [];
+				swal("Failed", `HTTP Code - ${httpResponse.status} : Error occured on server`, "error");
+			}
+		);
+	};
+
+	$scope.uploadMultipleImage = function (){
+		if(!qImageFiles){
+			return;
+		}
+
+		var form_data = new FormData();
+		var totalFiles = 0;
+
+		angular.forEach(qImageFiles, function (file, ind) {
+		    form_data.append(`fileToUpload${ind}`, file);
+		    totalFiles++;
+		});
+		
+		form_data.append(`totalFiles`, totalFiles);
+
+		$http.post(
+			"api/routes.php?action=image",
+			form_data,
+			{
+			    transformRequest: angular.identity,
+			    headers: {
+			        'Content-Type': undefined,
+			        'Process-Data': false
+			    }
+			}
+		).then(
+			function(httpResponse){
+				var apiResponse = httpResponse.data;
+				if(!apiResponse.complete){
+					$scope.studentsList = [];
+					swal({
+						icon : "error",
+						title: "Failed!",
+						text: apiResponse.message,
+						timer: 1500,
+						showConfirmButton: false
+					});
+					return;
+				}
+
+				qImageFiles= [];
+
+				apiResponse.result.forEach(function(image){
+					$scope.imagesList.push(image);
+				});
+
+
+				swal({
+					icon : "success",
+					title: "Success",
+					text: apiResponse.message,
+					timer: 1000,
+					showConfirmButton: false
+				});
+			},
+			function (httpResponse) {
+				$scope.studentsList = [];
+				swal("Failed", `HTTP Code - ${httpResponse.status} : Error occured on server`, "error");
+			}
+		);
+	};
+
+	$scope.uploadStudentsCSV = function (){
+
+		if(!studentsCSVFiles){
+			return;
+		}
+
+		var form_data = new FormData();
+		angular.forEach(studentsCSVFiles, function (file) {
+		    form_data.append('fileToUpload', file);
+		});
+		$http.post(
+			"api/routes.php?action=students",
+			form_data,
+			{
+			    transformRequest: angular.identity,
+			    headers: {
+			        'Content-Type': undefined,
+			        'Process-Data': false
+			    }
+			}
+		).then(
+			function(httpResponse){
 				var apiResponse = httpResponse.data;
 				if(!apiResponse.complete){
 					$scope.studentsList = [];
@@ -64,13 +216,17 @@ const _appCtrl = function($scope, $http, $timeout, $filter){
 	};
 
 	$scope.uploadQuestionsCSV = function () {
+
+		if(!questionsCSVFiles){
+			return;
+		}
 		
 		var form_data = new FormData();
 		angular.forEach(questionsCSVFiles, function (file) {
 		    form_data.append('fileToUpload', file);
 		});
 		$http.post(
-			'api/routes.php?action=questions',
+			"api/routes.php?action=questions",
 			form_data,
 			{
 			    transformRequest: angular.identity,
@@ -89,6 +245,7 @@ const _appCtrl = function($scope, $http, $timeout, $filter){
 				}
 
 				$scope.questionsList = apiResponse.result;
+
 				swal("", apiResponse.message, "success");
 			},
 			function (httpResponse) {
@@ -125,7 +282,20 @@ const _appCtrl = function($scope, $http, $timeout, $filter){
 		}
 	};
 
-	$scope.createDownloadPPTs = function(){
+	$scope.initAssignImage = function(qGroup, qIndex, qTitle, qPath){
+		$scope.qGroup	= qGroup;
+		$scope.qIndex	= qIndex;
+		$scope.qTitle	= qTitle;
+		$scope.qPath 	= qPath;
+	};
+
+	$scope.assignImage = function(path){
+		$scope.qPath = path;
+		$scope.questionsList[$scope.qGroup][$scope.qIndex].image = path;
+		$scope.resetImageAssign();
+	};
+
+	$scope.createDownloadIndPPTs = function(){
 
 		$("#downloadModal").modal({
 			backdrop: 'static',
@@ -134,25 +304,27 @@ const _appCtrl = function($scope, $http, $timeout, $filter){
 
 		$scope.dateTimeNow = $filter("date")(new Date(), 'yyyyMMdd_HHmmss');
 
-		swal("", "If your broswer prompts to grant permission to download multiple files. Please click on ALLOW.", "info");
+		swal("", "If your broswer prompts to grant permission to download multiple files. Please click on ALLOW.", "info").then(
+			function(){
+				$scope.downloading = true;
+				$scope.downloadProgress = 0;
+				$scope.downloadCount = 0;
+				$scope.totalDownloads = $scope.studentsList.length * $scope.questionsList.length;
 
-		$scope.downloading = true;
-		$scope.downloadProgress = 0;
-		$scope.downloadCount = 0;
-		$scope.totalDownloads = $scope.studentsList.length * $scope.questionsList.length;
-
-		// $("#downloadModal").modal("show");
-		
-		var seconds = 1;
-		$scope.pptList.forEach(function(ppt){
-			$timeout(function(){
-				$scope.createPPT(ppt);	
-			}, seconds*1000)
-			seconds += 6;
-		});
+				// $("#downloadModal").modal("show");
+				
+				var seconds = 1;
+				$scope.pptList.forEach(function(ppt){
+					$timeout(function(){
+						$scope.generateIndPPT(ppt);	
+					}, seconds*1000)
+					seconds += 6;
+				});
+			}
+		);
 	};
 
-	$scope.createPPT = function(ppt){
+	$scope.generateIndPPT = function(ppt){
 
 		$scope.downloadingStudent = ppt.name;
 		ppt.questions.forEach(function(question, index){
@@ -183,6 +355,83 @@ const _appCtrl = function($scope, $http, $timeout, $filter){
 			swal("", `Downloaded ${$scope.downloadCount} PPTs. Check your Downloads Folder`);
 		}
 	}
+
+	$scope.createDownloadPPTs = function(){		
+
+		$scope.dateTimeNow = $filter("date")(new Date(), 'yyyyMMdd_HHmmss');
+
+		swal("", "If your broswer prompts to grant permission to download multiple files. Please click on ALLOW.", "info").then(
+			function(){
+				$scope.downloading = true;
+				$scope.downloadProgress = 0;
+				$scope.downloadCount = 0;
+				$scope.totalDownloads = $scope.studentsList.length;
+
+				$("#downloadModal").modal({
+					backdrop: 'static',
+					keyboard: false
+				});
+
+				var seconds = 0;
+				$scope.pptList.forEach(function(ppt){
+					$timeout(function(){
+						$scope.generatePPT(ppt);	
+					}, seconds*1000)
+					seconds += 2;
+				});
+			}
+		);
+	};
+
+	$scope.generatePPT = function(ppt){
+		
+		let pptx	= new PptxGenJS();
+
+		$scope.downloadingStudent = ppt.name;
+		ppt.questions.forEach(function(question, index){
+			let slide	= pptx.addSlide();
+			let opts = {
+				x			: 0.0,
+				y			: 0.25,
+				w			: '100%',
+				h			: 1.5,
+				align		: 'center',
+				fontSize	: 24,
+				color		: '0088CC',
+				fill		: 'F1F1F1'
+			};
+
+			slide.addText(
+				question.title,
+				opts
+			);
+
+			if(question.image.length){
+				slide.addImage({
+					path	: question.image,
+					x		: 0.25,
+					y		: 2,
+					w		: 3.3,
+					h		: 3.3,
+					sizing	: {
+						type	: 'contain',
+						w		: 3.3,
+						h		: 3.3
+					}
+				});			
+			}
+		});
+
+		pptx.writeFile(`${ppt.name}-${$scope.dateTimeNow}`);
+		$scope.downloadCount++;
+
+		$scope.downloadProgress = $scope.downloadCount * 100 / $scope.totalDownloads;
+
+		if($scope.downloadCount==($scope.pptList.length)){
+			$("#downloadModal").modal("hide");
+			swal("", `Downloaded ${$scope.downloadCount} PPTs. Check your Downloads Folder`);
+		}
+	}
 };
 
 app.controller(
@@ -196,7 +445,7 @@ app.controller(
 	]
 );
 
-var studentsCSVFiles, questionsCSVFiles;
+var studentsCSVFiles, questionsCSVFiles, qImageFiles;
 
 app.directive("fileInput", function ($parse) {
 	return {
@@ -206,12 +455,13 @@ app.directive("fileInput", function ($parse) {
 				$parse(attrs.fileInput).assign($scope, files);
 
 				files[attrs.fileInput] = files;
-				if(attrs.fileInput=="studentsCSV"){
-					studentsCSVFiles = files;
+
+				switch(attrs.fileInput){
+					case "qImages"		: qImageFiles		= files; break;
+					case "studentsCSV"	: studentsCSVFiles 	= files; break;
+					case "questionsCSV"	: questionsCSVFiles	= files; break;
 				}
-				else{
-					questionsCSVFiles = files;
-				}
+
 				$scope.$apply();
 			});
 		}
