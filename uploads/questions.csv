@@ -1,30 +1,45 @@
-1,Define Flower.
-1,List the parts of first and second whorl.
-1,What is a Receptacle?
-1,Differentiate between complete and incomplete flower.
-1,Name the essential whorls.
-2,Name the non-essential whorls.
-2,What is a perianth?
-2,What is Petaloid? How is it different from Sepaloid?
-2,What is Bract? Give a flower that possesses Bract.
-2,What is nectaries? How are they useful?
-3,What are Hermaphrodite flowers?
-3,What is an imperfect flower?
-3,"Distinguish between flower and inflorescence, Monadelphous and diadelphous flower."
-3,Give an example of a flower which is polyadelphous.
-3,What is a placenta? What is placentation?
-4,What is pollination?
-4,Differentiate between Autogamy and geitonogamy?
-4,What is allogamy?
-4,What are the advantages are of cross pollination?
-4,What are the disadvantages are of cross pollination?
-5,What is self-pollination?
-5,List the advantages of self-pollination?
-5,What is protandry?
-5,What is protogyny?
-5,What is mean by self-sterility? Give an example.
-6,What is hercogamy?
-6,List the characters of Entomophilous flowers.
-6,What is meant by Anemophilous flowers?
-6,List the characters of Hydrophilous flowers.
-6,Name two flowers where Ornithophile is practiced.
+A,1,Name the non-essential whorls.,
+A,2,What is a perianth?,
+A,3,What is Petaloid? How is it different from Sepaloid?,
+A,4,What is Bract? Give a flower that possesses Bract.,
+A,5,What is nectaries? How are they useful?,
+B,1,What are Hermaphrodite flowers?,
+B,2,What is an imperfect flower?,
+B,3,"Distinguish between flower and inflorescence, Monadelphous and diadelphous flower.",
+B,4,Give an example of a flower which is polyadelphous.,
+B,5,What is a placenta? What is placentation?,
+C,1,What is pollination?,
+C,2,Differentiate between Autogamy and geitonogamy?,
+C,3,What is allogamy?,
+C,4,What are the advantages are of cross pollination?,
+C,5,What are the disadvantages are of cross pollination?,
+D,1,What is self-pollination?,
+D,2,List the advantages of self-pollination?,
+D,3,What is protandry?,
+D,4,What is protogyny?,
+D,5,What is mean by self-sterility? Give an example.,
+E,1,What is hercogamy?,
+E,2,List the characters of Entomophilous flowers.,
+E,3,What is meant by Anemophilous flowers?,
+E,4,List the characters of Hydrophilous flowers.,
+E,5,Name two flowers where Ornithophile is practiced.,
+F,1,Define Flower.,Sub question 1
+F,1,,Sub question 2
+F,1,,Sub question 3
+F,1,,Sub question 4
+F,2,List the parts of first and second whorl.,Sub question 1
+F,2,,Sub question 2
+F,2,,Sub question 3
+F,2,,Sub question 4
+F,3,What is a Receptacle?,Sub question 1
+F,3,,Sub question 2
+F,3,,Sub question 3
+F,3,,Sub question 4
+F,4,Differentiate between complete and incomplete flower.,Sub question 1
+F,4,,Sub question 2
+F,4,,Sub question 3
+F,4,,Sub question 4
+F,5,Name the essential whorls.,Sub question 1
+F,5,,Sub question 2
+F,5,,Sub question 3
+F,5,,Sub question 4

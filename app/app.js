@@ -24,8 +24,8 @@ const _appCtrl = function($scope, $http, $timeout, $filter){
 	$scope.studentsListFiles	= [];
 	$scope.questionsListFiles	= [];
 
-	// $scope.studentsList		= ["Jean King","Peter Ferguson","Janine Labrune","Jonas Bergulfsen","Susan Nelson","Zbyszek Piestrzeniewicz","Roland Keitel","Julie Murphy","Kwai Lee","Diego Freyre","Christina Berglund","Jytte Petersen","Mary Saveley","Eric Natividad","Jeff Young","Kelvin Leong","Juri Hashimoto","Wendy Victorino","Veysel Oeztan","Keith Franco","Isabel de","Martine Rance","Marie Bertrand","Jerry Tseng"];
-	// $scope.imagesList		= ["uploads/test/20200712085444_0.jpg","uploads/test/20200712085444_1.gif","uploads/test/20200712085444_2.jpg","uploads/test/20200712085444_3.jpg","uploads/test/20200712085444_4.jpg","uploads/test/20200712085444_5.jpg"];
+	$scope.studentsList		= ["Jean King","Peter Ferguson","Janine Labrune","Jonas Bergulfsen","Susan Nelson","Zbyszek Piestrzeniewicz","Roland Keitel","Julie Murphy","Kwai Lee","Diego Freyre","Christina Berglund","Jytte Petersen","Mary Saveley","Eric Natividad","Jeff Young","Kelvin Leong","Juri Hashimoto","Wendy Victorino","Veysel Oeztan","Keith Franco","Isabel de","Martine Rance","Marie Bertrand","Jerry Tseng"];
+	$scope.imagesList		= ["uploads/test/20200712085444_0.jpg","uploads/test/20200712085444_1.gif","uploads/test/20200712085444_2.jpg","uploads/test/20200712085444_3.jpg","uploads/test/20200712085444_4.jpg","uploads/test/20200712085444_5.jpg"];
 
 	$scope.resetPage = function(){
 		$scope.studentsList		= [];
@@ -397,7 +397,7 @@ const _appCtrl = function($scope, $http, $timeout, $filter){
 				h			: 1.5,
 				align		: 'center',
 				fontSize	: 24,
-				color		: '0088CC',
+				color		: '000000',
 				fill		: 'F1F1F1'
 			};
 

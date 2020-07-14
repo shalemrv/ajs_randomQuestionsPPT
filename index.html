@@ -109,6 +109,9 @@
 				object-fit: cover;
 				border-radius: 50%;
 			}
+			.subQuestion{	
+				display: block;
+			}
 			.activeImage{
 				box-shadow: 0 0 20px green;
 				border-radius: 2px 500px 500px 500px !important;
@@ -417,11 +420,18 @@
 															'table-danger' 		: ($index % 5==3),
 															'table-info' 		: ($index % 5==4)
 														}"
-														ng-bind="question.title"
 														data-toggle="modal"
 														data-target="#imageAssignModal"
 														ng-click="initAssignImage($parent.$index, $index, question.title, question.image)"
-													></td>
+													>
+														<div ng-bind="question.title"></div>
+														<small
+															class="subQuestion"
+															ng-if="question.subQuestions.length"
+															ng-repeat="subQ in question.subQuestions"
+															ng-bind="subQ"
+														></small>
+													</td>
 													<td
 														ng-if="question.image.length" 
 														ng-class="{

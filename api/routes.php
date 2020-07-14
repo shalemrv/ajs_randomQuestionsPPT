@@ -311,21 +311,35 @@
 
 			$rowCount = -1;
 
-			while(($rowArray = fgetcsv($csvFileObject, 10000, ",")) !== FALSE){
-				$rowCount++;
+			$subQuestions = array();
 
-				$group = $rowArray[0];
+			$rowCount = -1;
+
+			while(($rowArray = fgetcsv($csvFileObject, 10000, ",")) !== FALSE){
+
+				$group 		= $rowArray[0];
+				$sQuesKey	= $rowArray[1];
+				$sQuestion	= $rowArray[3];
+
 				if(!isset($questionsDataset[$group])){
+					$rowCount++;
 					$questionsDataset[$group] = array();
 				}
 
-				array_push(
-					$questionsDataset[$group],
-					array(
-						"title"	=> $rowArray[1],
-						"image"	=> ""	
-					)
-				);
+				if(!isset($questionsDataset[$group][$sQuesKey])){
+					$questionsDataset[$group][$sQuesKey] = array(
+						"title"			=> $rowArray[2],
+						"image"			=> "",	
+						"subQuestions"	=> array()
+					);
+				}
+
+				if(strlen($sQuestion)){
+					array_push(
+						$questionsDataset[$group][$sQuesKey]["subQuestions"],
+						$sQuestion
+					);
+				}
 			}
 
 			if($rowCount<=0){
@@ -336,11 +350,16 @@
 			$questions = array();
 			$finalCount = 0;
 
-			foreach ($questionsDataset as $key => $groupQuestions) {
-				array_push($questions, $groupQuestions);
-				$finalCount += sizeof($groupQuestions);
-			}
+			$group = array();
 
+			foreach($questionsDataset as $key => $groupQuestions){
+				$group = array();
+				foreach($groupQuestions as $mQ => $qObj){
+					array_push($group, $qObj);
+				}
+				array_push($questions, $group);
+			}
+			
 			$finalResponse = array(
 				"complete"  => true,
 				"message"   => "File successfully parsed. ".sizeof($questions)." categories & $finalCount questions parsed." ,
