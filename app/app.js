@@ -7,6 +7,8 @@ const _appCtrl = function($scope, $http, $timeout, $filter){
 	$scope.studentsList		= [];
 	$scope.questionsList	= [];
 
+	$scope.imagesUploading	= false;
+
 	$scope.pptList 			= [];
 
 	$scope.qGroup	= -1;
@@ -14,8 +16,10 @@ const _appCtrl = function($scope, $http, $timeout, $filter){
 	$scope.qTitle	= "";
 	$scope.qPath 	= "";
 
-
 	$scope.downloading		= false;
+	$scope.parsingStudents	= false;
+	$scope.parsingQuestions	= false;
+
 	$scope.downloadProgress	= 0;
 	$scope.downloadingStudent = "";
 
@@ -24,13 +28,14 @@ const _appCtrl = function($scope, $http, $timeout, $filter){
 	$scope.studentsListFiles	= [];
 	$scope.questionsListFiles	= [];
 
-	$scope.studentsList		= ["Jean King","Peter Ferguson","Janine Labrune","Jonas Bergulfsen","Susan Nelson","Zbyszek Piestrzeniewicz","Roland Keitel","Julie Murphy","Kwai Lee","Diego Freyre","Christina Berglund","Jytte Petersen","Mary Saveley","Eric Natividad","Jeff Young","Kelvin Leong","Juri Hashimoto","Wendy Victorino","Veysel Oeztan","Keith Franco","Isabel de","Martine Rance","Marie Bertrand","Jerry Tseng"];
-	$scope.imagesList		= ["uploads/test/20200712085444_0.jpg","uploads/test/20200712085444_1.gif","uploads/test/20200712085444_2.jpg","uploads/test/20200712085444_3.jpg","uploads/test/20200712085444_4.jpg","uploads/test/20200712085444_5.jpg"];
+	// Testing only
+
+	// $scope.studentsList		= ["Jean King","Peter Ferguson","Janine Labrune","Jonas Bergulfsen","Susan Nelson","Zbyszek Piestrzeniewicz","Roland Keitel","Julie Murphy","Kwai Lee","Diego Freyre","Christina Berglund","Jytte Petersen","Mary Saveley","Eric Natividad","Jeff Young","Kelvin Leong","Juri Hashimoto","Wendy Victorino","Veysel Oeztan","Keith Franco","Isabel de","Martine Rance","Marie Bertrand","Jerry Tseng"];
+	// $scope.imagesList		= ["uploads/test/20200712085444_0.jpg","uploads/test/20200712085444_1.gif","uploads/test/20200712085444_2.jpg","uploads/test/20200712085444_3.jpg","uploads/test/20200712085444_4.jpg","uploads/test/20200712085444_5.jpg"];
 
 	$scope.resetPage = function(){
 		$scope.studentsList		= [];
 		$scope.questionsList	= [];
-		$scope.imagesList		= [];
 		$scope.pptList 			= [];
 		$scope.downloading 		= false;
 		$scope.downloadProgress	= 0;
@@ -59,65 +64,12 @@ const _appCtrl = function($scope, $http, $timeout, $filter){
 
 	$scope.clearJunk();
 
-	$scope.uploadImage = function (){
-		if(!qImageFiles){
-			return;
-		}
-
-		var form_data = new FormData();
-
-		angular.forEach(qImageFiles, function (file, ind) {
-		    form_data.append('fileToUpload', file);
-		});
-
-		$http.post(
-			"api/routes.php?action=image",
-			form_data,
-			{
-			    transformRequest: angular.identity,
-			    headers: {
-			        'Content-Type': undefined,
-			        'Process-Data': false
-			    }
-			}
-		).then(
-			function(httpResponse){
-				var apiResponse = httpResponse.data;
-				if(!apiResponse.complete){
-					$scope.studentsList = [];
-					swal({
-						icon : "error",
-						title: "Failed!",
-						text: apiResponse.message,
-						timer: 1500,
-						showConfirmButton: false
-					});
-					return;
-				}
-
-				qImageFiles= [];
-
-				$scope.imagesList.push(apiResponse.result);
-
-				swal({
-					icon : "success",
-					title: "Success",
-					text: apiResponse.message,
-					timer: 1000,
-					showConfirmButton: false
-				});
-			},
-			function (httpResponse) {
-				$scope.studentsList = [];
-				swal("Failed", `HTTP Code - ${httpResponse.status} : Error occured on server`, "error");
-			}
-		);
-	};
-
 	$scope.uploadMultipleImage = function (){
 		if(!qImageFiles){
 			return;
 		}
+
+		$scope.imagesUploading	= true;
 
 		var form_data = new FormData();
 		var totalFiles = 0;
@@ -142,6 +94,9 @@ const _appCtrl = function($scope, $http, $timeout, $filter){
 		).then(
 			function(httpResponse){
 				var apiResponse = httpResponse.data;
+
+				$scope.imagesUploading	= false;
+
 				if(!apiResponse.complete){
 					$scope.studentsList = [];
 					swal({
@@ -153,6 +108,8 @@ const _appCtrl = function($scope, $http, $timeout, $filter){
 					});
 					return;
 				}
+
+				$("#closeImagesUploadModal").click();
 
 				qImageFiles= [];
 
@@ -182,6 +139,8 @@ const _appCtrl = function($scope, $http, $timeout, $filter){
 			return;
 		}
 
+		$scope.parsingStudents	= true;
+
 		var form_data = new FormData();
 		angular.forEach(studentsCSVFiles, function (file) {
 		    form_data.append('fileToUpload', file);
@@ -199,11 +158,16 @@ const _appCtrl = function($scope, $http, $timeout, $filter){
 		).then(
 			function(httpResponse){
 				var apiResponse = httpResponse.data;
+
+				$scope.parsingStudents	= false;
+
 				if(!apiResponse.complete){
 					$scope.studentsList = [];
 					swal("Failed", apiResponse.message, "error");
 					return;
 				}
+
+				$("#closeStudentsUploadModal").click();
 
 				$scope.studentsList = apiResponse.result;
 				swal("", apiResponse.message, "success");
@@ -220,6 +184,8 @@ const _appCtrl = function($scope, $http, $timeout, $filter){
 		if(!questionsCSVFiles){
 			return;
 		}
+
+		$scope.parsingQuestions	= true;
 		
 		var form_data = new FormData();
 		angular.forEach(questionsCSVFiles, function (file) {
@@ -238,13 +204,15 @@ const _appCtrl = function($scope, $http, $timeout, $filter){
 		).then(
 			function (httpResponse) {
 				var apiResponse = httpResponse.data;
+				$scope.parsingQuestions	= false;
 				if(!apiResponse.complete){
-					$scope.studentsList = [];
 					swal("Failed", apiResponse.message, "error");
 					return;
 				}
 
-				$scope.questionsList = apiResponse.result;
+				$scope.questionsList = apiResponse.result.questions;
+
+				$scope.questionsCount = apiResponse.result.count; 
 
 				swal("", apiResponse.message, "success");
 			},
@@ -258,18 +226,27 @@ const _appCtrl = function($scope, $http, $timeout, $filter){
 	$scope.assignQuestions = function(){
 		$scope.pptList = [];
 		
+		var gKeysList = Object.keys($scope.questionsList);
+
+
 		$scope.studentsList.forEach(function(student){
+
+			console.log(`student - ${student}`);
+			console.log("gKeysList");
+			console.log(gKeysList);
 
 			var pptObject = {
 				name 		: student,
 				questions	: []
-			};			
+			};
 
-			$scope.questionsList.forEach(function(category){
-				var noQuestions = category.length;
+			gKeysList.forEach(function(gKey){
+				var qKeysList = Object.keys($scope.questionsList[gKey]);
+				var noQuestions = qKeysList.length;
 
 				if(noQuestions){
-					var randomQuestion = category[Math.floor(Math.random() * noQuestions)];
+					var randomKey = qKeysList[Math.floor(Math.random() * noQuestions)];
+					var randomQuestion = $scope.questionsList[gKey][randomKey];
 					pptObject.questions.push(randomQuestion);
 				}
 			});
@@ -277,22 +254,28 @@ const _appCtrl = function($scope, $http, $timeout, $filter){
 			$scope.pptList.push(pptObject);
 		});
 
+		console.log($scope.pptList);
 		if($scope.pptList.length){
 			swal("", `Successfully assigned questions for ${$scope.pptList.length} students. Scroll Down to check and generate PPTs`, "success");
 		}
 	};
 
 	$scope.initAssignImage = function(qGroup, qIndex, qTitle, qPath){
+		console.log(`initAssignImage(${qGroup}, ${qIndex}, ${qTitle}, ${qPath})`);
 		$scope.qGroup	= qGroup;
 		$scope.qIndex	= qIndex;
 		$scope.qTitle	= qTitle;
 		$scope.qPath 	= qPath;
+		console.log(`initAssignImage(${$scope.qGroup}, ${$scope.qIndex}, ${$scope.qTitle}, ${$scope.qPath})`);
 	};
 
 	$scope.assignImage = function(path){
 		$scope.qPath = path;
-		$scope.questionsList[$scope.qGroup][$scope.qIndex].image = path;
-		$scope.resetImageAssign();
+		$scope.questionsList[`${$scope.qGroup}`][`${$scope.qIndex}`].image = path;
+
+		console.log("assignImage");
+		console.log($scope.questionsList[`${$scope.qGroup}`][`${$scope.qIndex}`]);
+		console.log($scope.questionsList[`${$scope.qGroup}`]);
 	};
 
 	$scope.createDownloadIndPPTs = function(){
@@ -329,7 +312,7 @@ const _appCtrl = function($scope, $http, $timeout, $filter){
 		$scope.downloadingStudent = ppt.name;
 		ppt.questions.forEach(function(question, index){
 			let pptx = new PptxGenJS();
-			let opts = {
+			let titleOpts = {
 				x: 0.0,
 				y: 0.25,
 				w: '100%',
@@ -341,7 +324,7 @@ const _appCtrl = function($scope, $http, $timeout, $filter){
 			};
 			pptx.addSlide().addText(
 				question,
-				opts
+				titleOpts
 			);
 
 			pptx.writeFile(`${ppt.name} Q${index + 1} ${$scope.dateTimeNow}`);
@@ -385,25 +368,38 @@ const _appCtrl = function($scope, $http, $timeout, $filter){
 
 	$scope.generatePPT = function(ppt){
 		
-		let pptx	= new PptxGenJS();
+		let pptx		= new PptxGenJS();
+		let titleOpts 	= {
+			x			: 0,
+			y			: 0.25,
+			w			: '100%',
+			h			: 1.5,
+			align		: 'center',
+			fontSize	: 24,
+			color		: '000000',
+			fill		: 'F1F1F1'
+		};
+
+		let subQuesOpts	= {
+			x			: 4,
+			y			: 2,
+			w			: 5.5,
+			h			: 3.3,
+			fontSize	: 12,
+			color		: '000000',
+			fill		: 'FFFFFF'
+		};
+
+		let subQuestionsCombined = "";
 
 		$scope.downloadingStudent = ppt.name;
 		ppt.questions.forEach(function(question, index){
 			let slide	= pptx.addSlide();
-			let opts = {
-				x			: 0.0,
-				y			: 0.25,
-				w			: '100%',
-				h			: 1.5,
-				align		: 'center',
-				fontSize	: 24,
-				color		: '000000',
-				fill		: 'F1F1F1'
-			};
+			
 
 			slide.addText(
 				question.title,
-				opts
+				titleOpts
 			);
 
 			if(question.image.length){
@@ -419,6 +415,13 @@ const _appCtrl = function($scope, $http, $timeout, $filter){
 						h		: 3.3
 					}
 				});			
+			}
+
+			if(question.subQuestions.length){
+				slide.addText(
+					question.subQuestions.map(function(sQ, i){ return `${i+1}. ${sQ}`}).join("\n\n"),
+					subQuesOpts
+				);
 			}
 		});
 

@@ -110,7 +110,7 @@
 
 				array_push(
 					$relativePathsList,
-					str_replace("{$_SERVER['DOCUMENT_ROOT']}/", "", $destination)
+					str_replace("{$_SERVER['DOCUMENT_ROOT']}", "", $destination)
 				);
 
 				$anyUploadSuccessful = true;
@@ -129,70 +129,13 @@
 				$errorMessages = "All files were uploaded successfully.";
 			}
 
+			$imagesLength = sizeof($relativePathsList);
+
 			$finalResponse = array(
 				"complete"  => true,
 				"message"   => $errorMessages,
 				"result"	=> $relativePathsList
 			);
-
-			return $finalResponse;
-		}
-
-		function uploadImagesSingle(){
-			$finalResponse = array(
-				"complete"  => false,
-				"message"   => "No File Received."
-			);
-
-			if(empty($_FILES)){
-				return $finalResponse;
-			}
-
-			if($_FILES["fileToUpload"]["size"] == 0){
-				$finalResponse["message"] = "File seems to be empty.";
-				return $finalResponse;
-			}
-
-			if($_FILES["fileToUpload"]["size"] > 2*1024*1024){
-				$finalResponse["message"] = "File size cannot be more 2MB.";
-				return $finalResponse;
-			}
-
-			$filename	= $_FILES["fileToUpload"]["tmp_name"];
-			$fName		= $_FILES["fileToUpload"]["name"];
-			$cFileName	= $_FILES["fileToUpload"]["name"];
-			$fileType	= $_FILES["fileToUpload"]["type"];
-
-			$destination = session_id();
-			$destination = "{$_SERVER['DOCUMENT_ROOT']}/uploads/{$destination}";
-
-			if(!file_exists($destination)){
-				mkdir($destination, 0777, true);
-				$logTime = date("Y-m-d H:i:s");
-				$logId = session_id();
-				$cLog = fopen('created.log', 'a');
-				fwrite($cLog, "$logTime - $logId\n");
-				fclose($cLog);
-			}
-
-			$fName = explode(".", $fName);
-
-			$fName = date("YmdHis").".".$fName[sizeof($fName) - 1]; 
-			
-			$destination = "{$destination}/{$fName}";
-
-			$relativePath = str_replace("{$_SERVER['DOCUMENT_ROOT']}/", "", $destination);
-
-			if(move_uploaded_file($filename, $destination)){
-				$finalResponse = array(
-					"complete"  => true,
-					"message"   => "$cFileName was uploaded successfully." ,
-					"result"	=> $relativePath
-				);				
-			}
-			else{
-				$finalResponse["message"] = "Failed to upload image.";
-			}
 
 			return $finalResponse;
 		}
@@ -319,7 +262,7 @@
 
 				$group 		= $rowArray[0];
 				$sQuesKey	= $rowArray[1];
-				$sQuestion	= $rowArray[3];
+				$sQuestion	= isset($rowArray[3])? trim($rowArray[3]) : "";
 
 				if(!isset($questionsDataset[$group])){
 					$rowCount++;
@@ -328,7 +271,7 @@
 
 				if(!isset($questionsDataset[$group][$sQuesKey])){
 					$questionsDataset[$group][$sQuesKey] = array(
-						"title"			=> $rowArray[2],
+						"title"			=> strtoupper(trim($rowArray[2])),
 						"image"			=> "",	
 						"subQuestions"	=> array()
 					);
@@ -337,7 +280,7 @@
 				if(strlen($sQuestion)){
 					array_push(
 						$questionsDataset[$group][$sQuesKey]["subQuestions"],
-						$sQuestion
+						strtoupper(trim($sQuestion))
 					);
 				}
 			}
@@ -350,20 +293,32 @@
 			$questions = array();
 			$finalCount = 0;
 
-			$group = array();
+			$totalQuestions = 0;
+
+			$i = 0;
+			$j = 0;
 
 			foreach($questionsDataset as $key => $groupQuestions){
+				$i++;
+				$j = 0;
 				$group = array();
 				foreach($groupQuestions as $mQ => $qObj){
-					array_push($group, $qObj);
+					$totalQuestions++;
+					$j++;
+					$newQKey = ($j < 10)? "question0$j" : "question$j"; 
+					$group[$newQKey]= $qObj;
 				}
-				array_push($questions, $group);
+				$newGKey = ($i < 10)? "group0$i" : "group$i"; 
+				$questions[$newGKey] = $group;
 			}
 			
 			$finalResponse = array(
 				"complete"  => true,
 				"message"   => "File successfully parsed. ".sizeof($questions)." categories & $finalCount questions parsed." ,
-				"result"	=> $questions
+				"result"	=> array(
+					"questions"	=> $questions,
+					"count"		=> $totalQuestions
+				)
 			);
 
 			return $finalResponse;

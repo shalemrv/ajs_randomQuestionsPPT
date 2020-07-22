@@ -2,6 +2,7 @@
 	<head>
 		<title>PPT Generate</title>
 		<link rel="stylesheet" href="src/bootstrap/bootstrap.min.css"/>
+		<link rel="icon" href="src/img/pptxStud.ico"/>
 		<style>
 			html{
 				font-size: 100%;
@@ -45,7 +46,6 @@
 			.grid-h-center{
 				display: grid;
 				grid-template-columns: 1fr auto 1fr;
-				padding: 10px 30px;
 			}
 			#uploadStudentsForm, #uploadQuestionsForm{
 				border: 2px solid black;
@@ -109,7 +109,7 @@
 				object-fit: cover;
 				border-radius: 50%;
 			}
-			.subQuestion{	
+			.subQuestion{
 				display: block;
 			}
 			.activeImage{
@@ -188,16 +188,27 @@
 		<div id="mainBody">
 			<div class="card text-white bg-primary" style="border-radius: 0 !important; color: white !important;">
 				<div class="card-header bg-info" style="padding: 5px 0 0 0 !important;">
-					<h6 class="text-center" ng-if="studentsList.length">Students ({{studentsList.length}})</h6>
+					<h6 class="text-center" ng-if="studentsList.length">
+						Students ({{studentsList.length}}) &nbsp;&nbsp;
+						<button class="btn btn-success btn-sm" data-toggle="modal" data-target="#studentsUploadModal" style="box-shadow: 0 0 5px grey;"> + </button>
+					</h6>
 					<h6 class="text-center" ng-hide="studentsList.length">Students</h6>
 				</div>
-				<div class="card-body smallScrollable" style="padding: 0 !important;" ng-hide="studentsList.length">
+				<div class="card-body" ng-if="parsingStudents">
 					<div class="card-text text-center pt-5">
-						No students added yet.
+						<img class="mb-4" src="src/img/loading.gif" alt="Stay put." style="width : 70px !important; border-radius: 50%;">
+						<h3>
+							Parsing Students File ...
+						</h3>
 					</div>
 				</div>
-				<div class="card-body smallScrollable" style="padding: 0 !important;" ng-if="studentsList.length">
-					<div class="card-text text-center">
+				<div class="card-body smallScrollable" style="padding: 0 !important;" ng-if="!parsingStudents">
+					<div class="card-text text-center pt-5" ng-if="!studentsList.length">
+						No students added yet.
+						<br><br><br>
+						<button class="btn btn-success" data-toggle="modal" data-target="#studentsUploadModal"> Add Now (+) </button>
+					</div>
+					<div class="card-text text-center" ng-if="studentsList.length">
 						<span
 							class="studentSideSpan"
 							ng-repeat="student in studentsList track by $index"
@@ -209,7 +220,7 @@
 			
 			<section class="pt-3 mainBodyScrollable">
 				<!-- First Row -->
-				<div class="grid-h-center">
+				<!-- <div class="grid-h-center">
 					<div></div>
 					<form id="uploadStudentsForm" name="uploadStudentsForm">
 						<fieldset>
@@ -246,28 +257,11 @@
 						</fieldset>
 					</form>
 					<div></div>
-				</div>
-
-				<!-- <div class="mt-3">
-					<div class="card text-white bg-primary" ng-if="imagesList.length" style="border-radius: 0 !important;">
-						<div class="card-header">
-							<h4 class="text-center">List of Images ({{imagesList.length}})</h4>
-						</div>
-						<div class="card-body">
-							<div class="card-text text-center">
-								<img
-									class="uploadedImage"
-									ng-repeat="img in imagesList track by $index"
-									ng-src="{{img}}"
-								/>
-							</div>
-						</div>
-					</div>
 				</div> -->
 
 				<!-- Second Row -->	
 
-				<div class="grid-h-center" ng-hide="studentsList.length">
+				<!-- <div class="grid-h-center" ng-hide="studentsList.length">
 					<div></div>
 					<form id="uploadStudentsForm" name="uploadStudentsForm">
 						<fieldset>
@@ -310,31 +304,10 @@
 						</fieldset>
 					</form>
 					<div></div>
-				</div>
-
-				<!-- <div class="grid-h-center mt-3">
-					<div></div>
-					<div>
-						<div class="card text-white bg-primary" ng-if="studentsList.length">
-							<div class="card-header">
-								<h4 class="text-center">List of Students ({{studentsList.length}})</h4>
-							</div>
-							<div class="card-body">
-								<div class="card-text text-center">
-									<span
-										class="studentSpan"
-										ng-repeat="student in studentsList track by $index"
-										ng-bind="student"
-									></span>
-								</div>
-							</div>
-						</div>
-					</div>
-					<div></div>
-				</div> -->			
+				</div> -->
 
 				<!-- Third Row -->
-				<div class="grid-h-center" ng-if="studentsList.length" ng-hide="questionsList.length">
+				<div class="grid-h-center" ng-hide="questionsCount">
 					<div></div>
 					<form id="uploadQuestionsForm" name="uploadQuestionsForm">
 						<fieldset>
@@ -379,195 +352,301 @@
 					<div></div>
 				</div>
 
-				<div class="grid-h-center mt-3" ng-if="questionsList.length">
-					<div></div>
-					<div>
-						<div class="card text-white bg-dark mb-3">
-							<div class="card-header">
-								<h4 class="text-center">All Questions ({{questionsList.length}} groups)</h4>
-							</div>
-							<div class="card-body text-center">
-								<div class="questionCard card text-white bg-primary" ng-repeat="category in questionsList track by $index">
-									<div class="card-header">
-										<h4 class="text-center">Questions Group {{$index + 1}} :</h4>
-									</div>
-									<div class="card-body">
-										<div class="card-text text-left">
-											<table class="table table-hover">
-												<tr ng-repeat="question in category track by $index">
-													<td
-														ng-class="{
-															'table-primary' 	: ($index % 5==0),
-															'table-secondary' 	: ($index % 5==1),
-															'table-success' 	: ($index % 5==2),
-															'table-danger' 		: ($index % 5==3),
-															'table-info' 		: ($index % 5==4)
-														}"
-														ng-click="initAssignImage($parent.$index, $index, question.title, question.image)"
-														style="cursor: pointer;"
-														data-toggle="modal"
-														data-target="#imageAssignModal"
-													>
-														🎫
-													</td>
-													<td
-														ng-hide="question.image.length"
-														colspan="2"
-														ng-class="{
-															'table-primary' 	: ($index % 5==0),
-															'table-secondary' 	: ($index % 5==1),
-															'table-success' 	: ($index % 5==2),
-															'table-danger' 		: ($index % 5==3),
-															'table-info' 		: ($index % 5==4)
-														}"
-														data-toggle="modal"
-														data-target="#imageAssignModal"
-														ng-click="initAssignImage($parent.$index, $index, question.title, question.image)"
-													>
-														<div ng-bind="question.title"></div>
-														<small
-															class="subQuestion"
-															ng-if="question.subQuestions.length"
-															ng-repeat="subQ in question.subQuestions"
-															ng-bind="subQ"
-														></small>
-													</td>
-													<td
-														ng-if="question.image.length" 
-														ng-class="{
-															'table-primary' 	: ($index % 5==0),
-															'table-secondary' 	: ($index % 5==1),
-															'table-success' 	: ($index % 5==2),
-															'table-danger' 		: ($index % 5==3),
-															'table-info' 		: ($index % 5==4)
-														}"
-														ng-bind="question.title"
-														data-toggle="modal"
-														data-target="#imageAssignModal"
-														ng-click="initAssignImage($parent.$index, $index, question.title, question.image)"
-													></td>
-													<td
-														ng-if="question.image.length" 
-														ng-class="{
-															'table-primary' 	: ($index % 5==0),
-															'table-secondary' 	: ($index % 5==1),
-															'table-success' 	: ($index % 5==2),
-															'table-danger' 		: ($index % 5==3),
-															'table-info' 		: ($index % 5==4)
-														}"
-														class="questionImageTd"
-														data-toggle="modal"
-														data-target="#imageAssignModal"
-														ng-click="initAssignImage($parent.$index, $index, question.title, question.image)"
-													>
-														<img
-															ng-src="{{question.image}}"
-															alt="{{question.image}}"
-														/>
-													</td>
-												</tr>
-											</table>
-										</div>
-									</div>
-								</div>							
-								<div class="text-center">
-									<button type="button" class="btn btn-info" ng-click="assignQuestions();">Assign Questions</button>
+				<div class="mt-3" ng-if="questionsCount">
+					<div class="card text-white bg-dark mb-3">
+						<div class="card-header">
+							<h4 class="text-center">All Questions ({{questionsCount}} groups)</h4>
+						</div>
+						<div class="card-body text-center">
+							<div class="questionCard card text-white bg-primary" ng-repeat="(catKey, questionsGroup) in questionsList">
+								<div class="card-header">
+									<h4 class="text-center">Questions Group {{$index + 1}} :</h4>
 								</div>
+								<div class="card-body">
+									<div class="card-text text-left">
+										<table class="table table-hover">
+											<tr ng-repeat="(qKey, question) in questionsGroup">
+												<td
+													ng-class="{
+														'table-primary' 	: ($index % 5==0),
+														'table-secondary' 	: ($index % 5==1),
+														'table-success' 	: ($index % 5==2),
+														'table-danger' 		: ($index % 5==3),
+														'table-info' 		: ($index % 5==4)
+													}"
+													ng-click="initAssignImage(catKey, qKey, question.title, question.image)"
+													style="cursor: pointer;"
+													data-toggle="modal"
+													data-target="#imageAssignModal"
+												>
+													<img src="src/img/assignImage.png" style="width: 15px;"/>
+												</td>
+												<td
+													ng-hide="question.image.length"
+													colspan="2"
+													ng-class="{
+														'table-primary' 	: ($index % 5==0),
+														'table-secondary' 	: ($index % 5==1),
+														'table-success' 	: ($index % 5==2),
+														'table-danger' 		: ($index % 5==3),
+														'table-info' 		: ($index % 5==4)
+													}"
+													data-toggle="modal"
+													data-target="#imageAssignModal"
+													ng-click="initAssignImage(catKey, qKey, question.title, question.image)"
+												>
+													<div ng-bind="question.title"></div>
+													<small
+														class="subQuestion"
+														ng-if="question.subQuestions.length"
+														ng-repeat="subQ in question.subQuestions"
+													>
+														{{$index+1}}. {{subQ}}
+													</small>
+												</td>
+												<td
+													ng-if="question.image.length" 
+													ng-class="{
+														'table-primary' 	: ($index % 5==0),
+														'table-secondary' 	: ($index % 5==1),
+														'table-success' 	: ($index % 5==2),
+														'table-danger' 		: ($index % 5==3),
+														'table-info' 		: ($index % 5==4)
+													}"
+													data-toggle="modal"
+													data-target="#imageAssignModal"
+													ng-click="initAssignImage(catKey, qKey, question.title, question.image)"
+												>
+													<div ng-bind="question.title"></div>
+													<small
+														class="subQuestion"
+														ng-if="question.subQuestions.length"
+														ng-repeat="subQ in question.subQuestions"
+													>
+														{{$index+1}}. {{subQ}}
+													</small>
+												</td>
+												<td
+													ng-if="question.image.length" 
+													ng-class="{
+														'table-primary' 	: ($index % 5==0),
+														'table-secondary' 	: ($index % 5==1),
+														'table-success' 	: ($index % 5==2),
+														'table-danger' 		: ($index % 5==3),
+														'table-info' 		: ($index % 5==4)
+													}"
+													class="questionImageTd"
+													data-toggle="modal"
+													data-target="#imageAssignModal"
+													ng-click="initAssignImage(catKey, qKey, question.title, question.image)"
+												>
+													<img
+														ng-src="{{question.image}}"
+														alt="{{question.image}}"
+													/>
+												</td>
+											</tr>
+										</table>
+									</div>
+								</div>
+							</div>							
+							<div class="text-center">
+								<button type="button" class="btn btn-info" ng-click="assignQuestions();">Assign Questions</button>
 							</div>
 						</div>
 					</div>
-					<div></div>
 				</div>
 
-				<div class="grid-h-center mt-3" ng-if="pptList.length">
-					<div></div>
-					<div>
-						<div class="card text-white bg-dark mb-3">
-							<div class="card-header">
-								<h4 class="text-center">Questions Assigned ({{pptList.length}} sets)</h4>
+				<div class="mt-3" ng-if="pptList.length">
+					<div class="card text-white bg-dark mb-3">
+						<div class="card-header">
+							<h4 class="text-center">Questions Assigned ({{pptList.length}} sets)</h4>
+						</div>
+						<div class="card-body text-center">
+							<div class="questionCard card text-white bg-primary" ng-repeat="student in pptList track by $index">
+								<div class="card-header">
+									<h4 class="text-center" ng-bind="student.name"></h4>
+								</div>
+								<div class="card-body">
+									<div class="card-text text-left">
+										<table class="table table-hover">
+											<tr ng-repeat="question in student.questions track by $index">
+												<td
+													ng-hide="question.image.length"
+													colspan="2"
+													ng-class="{
+														'table-primary' 	: ($index % 5==0),
+														'table-secondary' 	: ($index % 5==1),
+														'table-success' 	: ($index % 5==2),
+														'table-danger' 		: ($index % 5==3),
+														'table-info' 		: ($index % 5==4)
+													}"
+													ng-bind="question.title"
+												></td>
+												<td
+													ng-if="question.image.length"
+													ng-class="{
+														'table-primary' 	: ($index % 5==0),
+														'table-secondary' 	: ($index % 5==1),
+														'table-success' 	: ($index % 5==2),
+														'table-danger' 		: ($index % 5==3),
+														'table-info' 		: ($index % 5==4)
+													}"
+													ng-bind="question.title"
+												></td>
+												<td
+													ng-if="question.image.length"
+													ng-class="{
+														'table-primary' 	: ($index % 5==0),
+														'table-secondary' 	: ($index % 5==1),
+														'table-success' 	: ($index % 5==2),
+														'table-danger' 		: ($index % 5==3),
+														'table-info' 		: ($index % 5==4)
+													}"
+													class="questionImageTd"
+												>
+													<img
+														ng-src="{{question.image}}"
+														alt="{{question.image}}"
+													/>
+												</td>
+											</tr>
+										</table>
+									</div>
+								</div>
 							</div>
-							<div class="card-body text-center">
-								<div class="questionCard card text-white bg-primary" ng-repeat="student in pptList track by $index">
-									<div class="card-header">
-										<h4 class="text-center" ng-bind="student.name"></h4>
-									</div>
-									<div class="card-body">
-										<div class="card-text text-left">
-											<table class="table table-hover">
-												<tr ng-repeat="question in student.questions track by $index">
-													<td
-														ng-hide="question.image.length"
-														colspan="2"
-														ng-class="{
-															'table-primary' 	: ($index % 5==0),
-															'table-secondary' 	: ($index % 5==1),
-															'table-success' 	: ($index % 5==2),
-															'table-danger' 		: ($index % 5==3),
-															'table-info' 		: ($index % 5==4)
-														}"
-														ng-bind="question.title"
-													></td>
-													<td
-														ng-if="question.image.length"
-														ng-class="{
-															'table-primary' 	: ($index % 5==0),
-															'table-secondary' 	: ($index % 5==1),
-															'table-success' 	: ($index % 5==2),
-															'table-danger' 		: ($index % 5==3),
-															'table-info' 		: ($index % 5==4)
-														}"
-														ng-bind="question.title"
-													></td>
-													<td
-														ng-if="question.image.length"
-														ng-class="{
-															'table-primary' 	: ($index % 5==0),
-															'table-secondary' 	: ($index % 5==1),
-															'table-success' 	: ($index % 5==2),
-															'table-danger' 		: ($index % 5==3),
-															'table-info' 		: ($index % 5==4)
-														}"
-														class="questionImageTd"
-													>
-														<img
-															ng-src="{{question.image}}"
-															alt="{{question.image}}"
-														/>
-													</td>
-												</tr>
-											</table>
-										</div>
-									</div>
-								</div>
-								<div class="text-center">
-									<!-- <button type="button" class="btn btn-info" ng-click="createDownloadIndPPTs();">Create ({{pptList.length * questionsList.length}}) PPT and Download</button> -->
-									<!-- &nbsp; -->
-									<button type="button" class="btn btn-info" ng-click="createDownloadPPTs();">Create ({{pptList.length}}) PPT and Download</button>
-								</div>
+							<div class="text-center">
+								<!-- <button type="button" class="btn btn-info" ng-click="createDownloadIndPPTs();">Create ({{pptList.length * questionsCount}}) PPT and Download</button> -->
+								<!-- &nbsp; -->
+								<button type="button" class="btn btn-info" ng-click="createDownloadPPTs();">Create ({{pptList.length}}) PPT and Download</button>
 							</div>
 						</div>
 					</div>
-					<div></div>
 				</div>
 			</section>
 
 			<div class="card text-white bg-primary" style="border-radius: 0 !important; color: white !important;">
 				<div class="card-header bg-info" style="padding: 5px 0 0 0 !important;">
-					<h6 class="text-center" ng-if="imagesList.length">Images Uploaded ({{imagesList.length}})</h6>
+					<h6 class="text-center" ng-if="imagesList.length">
+						Images Uploaded ({{imagesList.length}}) &nbsp;&nbsp;
+						<button class="btn btn-success btn-sm" data-toggle="modal" data-target="#imagesUploadModal" style="box-shadow: 0 0 5px grey;"> + </button>
+					</h6>
 					<h6 class="text-center" ng-hide="imagesList.length">Images Uploaded</h6>
 				</div>
-				<div class="card-body smallScrollable" style="padding: 0 !important;" ng-hide="imagesList.length">
+				<div class="card-body" ng-if="imagesUploading">
 					<div class="card-text text-center pt-5">
-						No images uploaded yet.
+						<img class="mb-4" src="src/img/loading.gif" alt="Stay put." style="width : 70px !important; border-radius: 50%;">
+						<h3>
+							Please wait. Uploading Images ...
+						</h3>
 					</div>
 				</div>
-				<div class="card-body smallScrollable" style="padding: 0 !important;" ng-if="imagesList.length">
-					<div class="card-text text-center">
+				<div class="card-body smallScrollable" style="padding: 0 !important;" ng-if="!imagesUploading">
+					<div class="card-text text-center pt-5" ng-if="!imagesList.length">
+						No images uploaded yet.
+						<br><br><br>
+						<button class="btn btn-success" data-toggle="modal" data-target="#imagesUploadModal"> Add Now (+) </button>
+					</div>
+					<div class="card-text text-center" ng-if="imagesList.length">
 						<img
 							class="uploadedImageSide"
 							ng-repeat="img in imagesList track by $index"
 							ng-src="{{img}}"
 						/>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="modal fade in" id="studentsUploadModal">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content">
+					<div class="modal-body">
+						<button id="closeStudentsUploadModal" data-dismiss="modal" style="visibility: hidden;"></button>
+						<form id="uploadStudentsForm" name="uploadStudentsForm">
+							<fieldset>
+								<div class="row">
+									<div class="col-md-8 col-sm-8 col-xs-8">
+										<div class="form-group">
+											<label for="studentsCSV" class="font-weight-bold">Upload Students List File (CSV)</label>
+											<input
+												type="file"
+												class="form-control-file"
+												id="studentsCSV"
+												aria-describedby="fileHelpStudents"
+												file-input="studentsCSV"
+												required
+											/>
+											<small id="fileHelpStudents" class="form-text text-muted">
+												The second column of the file has to contain the names of students.
+											</small>
+										</div>
+									</div>					
+									<div class="col-md-4 col-sm-4 col-xs-4 text-center">
+										<a
+											class="nav-link font-weight-bold text-muted"
+											href="uploads/students.csv"
+											style="display: inline-block;"
+											download
+										>
+											Download Sample CSV
+										</a>
+										<button
+											ng-click="uploadStudentsCSV()"
+											ng-disabled="uploadStudentsForm.$invalid"
+											class="btn btn-primary"
+											style="margin-top: 5px;"
+										>
+											Upload
+										</button>
+									</div>
+								</div>
+							</fieldset>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="modal fade in" id="imagesUploadModal">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content">
+					<div class="modal-body">
+						<button id="closeImagesUploadModal" data-dismiss="modal" style="visibility: hidden;"></button>
+						<form id="uploadStudentsForm" name="uploadStudentsForm">
+							<fieldset>
+								<div class="row">
+									<div class="col-md-8 col-sm-8 col-xs-8">
+										<div class="form-group">
+											<label for="studentsCSV" class="font-weight-bold">Upload Images</label>
+											<input
+												type="file"
+												accept="image/*"
+												class="form-control-file"
+												id="studentsCSV"
+												aria-describedby="fileHelpImages"
+												file-input="qImages"
+												multiple
+												required
+											/>
+											<small id="fileHelpImages" class="form-text text-muted">
+												Upload all images for questions one by one.
+											</small>
+										</div>
+									</div>
+									<div class="col-md-4 col-sm-4 col-xs-4 text-center">
+										<button
+											ng-click="uploadMultipleImage()"
+											ng-disabled="uploadStudentsForm.$invalid"
+											class="btn btn-primary"
+											style="margin-top: 5px;"
+										>
+											Upload
+										</button>
+									</div>
+								</div>
+							</fieldset>
+						</form>
 					</div>
 				</div>
 			</div>
