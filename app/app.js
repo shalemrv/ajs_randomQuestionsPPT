@@ -1,6 +1,15 @@
 const app = angular.module("myApp", []);
 
 
+const shuffleSwap = (arr) => {
+	for (var i = arr.length - 1; i > 0; i--) {
+		let j = Math.floor(Math.random() * (i + 1));
+		let temp = arr[i];
+		arr[i] = arr[j];
+		arr[j] = temp;
+	}
+}
+
 const _appCtrl = function($scope, $http, $timeout, $filter){
 	
 	$scope.imagesList		= [];
@@ -32,7 +41,7 @@ const _appCtrl = function($scope, $http, $timeout, $filter){
 
 	// $scope.studentsList		= ["Jean King","Peter Ferguson","Janine Labrune","Jonas Bergulfsen","Susan Nelson","Zbyszek Piestrzeniewicz","Roland Keitel","Julie Murphy","Kwai Lee","Diego Freyre","Christina Berglund","Jytte Petersen","Mary Saveley","Eric Natividad","Jeff Young","Kelvin Leong","Juri Hashimoto","Wendy Victorino","Veysel Oeztan","Keith Franco","Isabel de","Martine Rance","Marie Bertrand","Jerry Tseng"];
 	// $scope.imagesList		= ["uploads/test/20200712085444_0.jpg","uploads/test/20200712085444_1.gif","uploads/test/20200712085444_2.jpg","uploads/test/20200712085444_3.jpg","uploads/test/20200712085444_4.jpg","uploads/test/20200712085444_5.jpg"];
-
+	
 	$scope.resetPage = function(){
 		$scope.studentsList		= [];
 		$scope.questionsList	= [];
@@ -425,7 +434,8 @@ const _appCtrl = function($scope, $http, $timeout, $filter){
 			}
 		});
 
-		pptx.writeFile(`${ppt.name}-${$scope.dateTimeNow}`);
+		// pptx.writeFile(`${ppt.name}-${$scope.dateTimeNow}`);
+		pptx.writeFile(ppt.name);
 		$scope.downloadCount++;
 
 		$scope.downloadProgress = $scope.downloadCount * 100 / $scope.totalDownloads;

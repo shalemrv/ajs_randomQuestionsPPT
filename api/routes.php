@@ -11,8 +11,8 @@
 	error_reporting(0);
 
 	$finalResponse = array(
-		"complete"  => false,
-		"message"   => "Invalid Request."
+		"complete"	=> false,
+		"message"	=> "Invalid Request."
 	);
 
 	session_start();
@@ -42,7 +42,21 @@
 
 	class ActionHandler{
 
-		function uploadImages(){
+		private function removeNonUTF8($Str) {
+			$strArr = str_split($Str);
+
+			$nonUTF8 = '';
+			foreach($strArr as $char){
+				$cCode = ord($char);
+
+				if($cCode > 31 && $cCode < 127){
+					$nonUTF8 .= $char;
+				}
+			}
+			return $nonUTF8;
+		}
+
+		public function uploadImages(){
 			$finalResponse = array(
 				"complete"  => false,
 				"message"   => "No File Received."
@@ -140,7 +154,7 @@
 			return $finalResponse;
 		}
 
-		function processStudents(){
+		public function processStudents(){
 			$finalResponse = array(
 				"complete"  => false,
 				"message"   => "No File Received."
@@ -182,17 +196,17 @@
 
 			$rowCount = -1;
 
-			while(($rowArray = fgetcsv($csvFileObject, 10000, ",")) !== FALSE){
+			while(($csvRow = fgetcsv($csvFileObject, 10000, ",")) !== FALSE){
 				$rowCount++;
 				if($rowCount==0){
 					continue;
 				}
 
-				$sName = explode(" ", $rowArray[1]);
+				$sName = explode(" ", $csvRow[1]);
 
 				$sName = array_splice($sName, 0, 2);
 
-				$sName = implode(" ", $sName);			
+				$sName = implode(" ", $sName);
 
 				array_push($students, $sName);
 			}
@@ -211,7 +225,7 @@
 			return $finalResponse;
 		}
 
-		function processQuestions(){
+		public function processQuestions(){
 			$finalResponse = array(
 				"complete"  => false,
 				"message"   => "No File Received.",
@@ -252,17 +266,22 @@
 
 			$questionsDataset = array();
 
-			$rowCount = -1;
-
 			$subQuestions = array();
 
 			$rowCount = -1;
 
-			while(($rowArray = fgetcsv($csvFileObject, 10000, ",")) !== FALSE){
+			$csvRow = fgetcsv($csvFileObject, 10000, ",");
 
-				$group 		= $rowArray[0];
-				$sQuesKey	= $rowArray[1];
-				$sQuestion	= isset($rowArray[3])? trim($rowArray[3]) : "";
+			while(($csvRow = fgetcsv($csvFileObject, 10000, ",")) !== FALSE){
+
+				$csvRow = array_map('trim', $csvRow);
+				$csvRow = array_map(array($this, 'removeNonUTF8'), $csvRow);
+				$csvRow = array_map('strtoupper', $csvRow);
+
+
+				$group 		= $csvRow[0];
+				$sQuesKey	= $csvRow[1];
+				$sQuestion	= isset($csvRow[3])? $csvRow[3] : "";
 
 				if(!isset($questionsDataset[$group])){
 					$rowCount++;
@@ -271,7 +290,7 @@
 
 				if(!isset($questionsDataset[$group][$sQuesKey])){
 					$questionsDataset[$group][$sQuesKey] = array(
-						"title"			=> strtoupper(trim($rowArray[2])),
+						"title"			=> $csvRow[2],
 						"image"			=> "",	
 						"subQuestions"	=> array()
 					);
@@ -280,7 +299,7 @@
 				if(strlen($sQuestion)){
 					array_push(
 						$questionsDataset[$group][$sQuesKey]["subQuestions"],
-						strtoupper(trim($sQuestion))
+						$sQuestion
 					);
 				}
 			}
@@ -324,7 +343,7 @@
 			return $finalResponse;
 		}
 
-		function deletePreviousUploads(){
+		public function deletePreviousUploads(){
 
 			$timeNow	= date_create(date("Y-m-d H:i:s"));
 
