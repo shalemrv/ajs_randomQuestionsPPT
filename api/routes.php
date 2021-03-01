@@ -202,7 +202,7 @@
 					continue;
 				}
 
-				$sName = explode(" ", $csvRow[1]);
+				$sName = explode(" ", $csvRow[0]);
 
 				$sName = array_splice($sName, 0, 2);
 

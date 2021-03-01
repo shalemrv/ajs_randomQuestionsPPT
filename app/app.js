@@ -48,6 +48,7 @@ const _appCtrl = function($scope, $http, $timeout, $filter){
 		$scope.pptList 			= [];
 		$scope.downloading 		= false;
 		$scope.downloadProgress	= 0;
+		$scope.questionsCount	= 0;
 		$scope.downloadingStudent = "";
 
 		$scope.studentsListFiles	= [];
@@ -233,10 +234,15 @@ const _appCtrl = function($scope, $http, $timeout, $filter){
 	};
 
 	$scope.assignQuestions = function(){
+
+		if($scope.studentsList.length==0){
+			swal("", "There are no students. Please upload students file.", "warning");
+			return;
+		}
+		
 		$scope.pptList = [];
 		
 		var gKeysList = Object.keys($scope.questionsList);
-
 
 		$scope.studentsList.forEach(function(student){
 

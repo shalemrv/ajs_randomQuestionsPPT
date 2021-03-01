@@ -140,6 +140,26 @@
 				min-width: 70vw !important;
 				max-width: 90vw !important;
             }
+            .pulsate{
+            	transition: all 0.75s ease-in-out;
+            }
+            .pulsate.odd{
+            	animation: pulsate 0.75s ease-in-out alternate infinite;
+            }
+            .pulsate.even{
+            	animation: pulsate 0.75s 0.375s ease-in-out alternate infinite;
+            }
+            .pulsate:hover{
+            	animation: none;
+            }
+            @keyframes pulsate {
+            	from{
+            		transform: scale(1);
+            	}
+            	to{
+            		transform: scale(0.75);
+            	}
+            }
 		</style>
 
 		<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
@@ -211,7 +231,7 @@
 					<div class="card-text text-center pt-5" ng-if="!studentsList.length">
 						No students added yet.
 						<br><br><br>
-						<button class="btn btn-success" data-toggle="modal" data-target="#studentsUploadModal"> Add Now (+) </button>
+						<button class="btn btn-dark font-weight-bold pulsate odd" data-toggle="modal" data-target="#studentsUploadModal"> Add Students Now (+) </button>
 					</div>
 					<div class="card-text text-center" ng-if="studentsList.length">
 						<span
@@ -558,7 +578,7 @@
 					<div class="card-text text-center pt-5" ng-if="!imagesList.length">
 						No images uploaded yet.
 						<br><br><br>
-						<button class="btn btn-success" data-toggle="modal" data-target="#imagesUploadModal"> Add Now (+) </button>
+						<button class="btn btn-dark font-weight-bold pulsate even" data-toggle="modal" data-target="#imagesUploadModal"> Add Images Now (+) </button>
 					</div>
 					<div class="card-text text-center" ng-if="imagesList.length">
 						<img
@@ -594,12 +614,12 @@
 											<small class="font-weight-bold">
 												The first row of the CSV file will be ignored assuming they are just labels.
 												<div>
-													(Eg. RollNo, Student Name etc.)
+													(Eg. Student/File Name)
 												</div>
 											</small>
 										</div>
 											<small id="fileHelpStudents" class="form-text text-muted">
-												The second column of the file has to contain the names of students which will be the names of files to be downloaded.
+												The first column of the file has to contain the names of students/files which will be the names of files to be downloaded.
 											</small>
 										</div>
 									</div>					
